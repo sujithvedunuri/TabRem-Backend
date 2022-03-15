@@ -1,22 +1,48 @@
 package daos
 
 import (
+	"log"
 	"sujith/tabRemBackend/beans"
 	"sujith/tabRemBackend/resources/database"
+
+	"github.com/gin-gonic/gin"
 )
 
+//fetch all details from database
 func FetchMedicineDetails() []beans.Medicine {
 	var medicines []beans.Medicine
 	database.Db.Find(&medicines)
 	return medicines
 }
 
+//get details from database using id
 func FetchMedicineById() beans.Medicine {
 	var medicines beans.Medicine
 	database.Db.Where("id=?").First(&medicines)
 	return medicines
 }
 
-func AddMedicineDetials() {
-	//add details to database
+//add details to database
+func AddMedicineDetials(c *gin.Context) {
+	var medicines beans.Medicine
+	if err := c.ShouldBindJSON(&medicines); err == nil {
+		database.Db.Create(&medicines)
+	} else {
+		log.Fatal(err)
+	}
+	meds := c.Params
+	log.Fatal(meds)
+	// database.Db.Create(&medicines)
+}
+
+func DeleteMedicineFromDB(id int) (beans.Medicine, error) {
+	var medicine beans.Medicine
+	result := database.Db.Where("id = ?", id).First(&medicine)
+	if result.Error != nil {
+		return medicine, result.Error
+	} else {
+		result := database.Db.Delete(&medicine, id)
+		return medicine, result.Error
+
+	}
 }
