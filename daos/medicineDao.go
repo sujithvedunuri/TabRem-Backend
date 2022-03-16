@@ -1,6 +1,7 @@
 package daos
 
 import (
+	"fmt"
 	"log"
 	"sujith/tabRemBackend/beans"
 	"sujith/tabRemBackend/resources/database"
@@ -16,10 +17,10 @@ func FetchMedicineDetails() []beans.Medicine {
 }
 
 //get details from database using id
-func FetchMedicineById() beans.Medicine {
-	var medicines beans.Medicine
-	database.Db.Where("id=?").First(&medicines)
-	return medicines
+func FetchMedicineById(id int) ([]beans.Medicine, error) {
+	var medicine []beans.Medicine
+	result := database.Db.Where("id = ?", id).Find(&medicine)
+	return medicine, result.Error
 }
 
 //add details to database
@@ -35,8 +36,10 @@ func AddMedicineDetials(c *gin.Context) {
 	// database.Db.Create(&medicines)
 }
 
+//delete row from table
 func DeleteMedicineFromDB(id int) (beans.Medicine, error) {
 	var medicine beans.Medicine
+	fmt.Println(id)
 	result := database.Db.Where("id = ?", id).First(&medicine)
 	if result.Error != nil {
 		return medicine, result.Error
@@ -45,4 +48,5 @@ func DeleteMedicineFromDB(id int) (beans.Medicine, error) {
 		return medicine, result.Error
 
 	}
+
 }

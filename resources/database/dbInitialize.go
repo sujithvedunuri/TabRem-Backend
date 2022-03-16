@@ -28,5 +28,6 @@ func Init() {
 		log.Fatal("unable to connect to the database")
 	}
 	Db.AutoMigrate(&beans.Medicine{})
+	Db.AutoMigrate(&beans.User{})
 
 }

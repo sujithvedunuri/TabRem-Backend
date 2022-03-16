@@ -20,12 +20,27 @@ func GetMedicineDetails(c *gin.Context) {
 
 func GetCurrentMedicineDetail(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	var id = c.Param("ID")
-	var query []beans.Medicine
-	database.Db.Where("id", id).Find(&query)
-	fmt.Println(query)
-	c.IndentedJSON(
-		http.StatusOK, query)
+	id := c.Param("id")
+	// id = id[1:]
+	fmt.Printf("type of %T", id)
+	fmt.Print("id is", id, "this is id")
+	id_final, err := strconv.ParseInt(id, 10, 64)
+	fmt.Printf("type of %T", id_final)
+
+	if err != nil {
+		fmt.Printf("cannot  converting id string to int")
+	}
+	medicine, err := daos.FetchMedicineById(int(id_final))
+
+	if err != nil {
+		fmt.Println("error getting value by ID")
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusOK, gin.H{
+			"Message": " cannot find medicibe by ID " + id,
+		})
+	} else {
+		c.IndentedJSON(200, medicine)
+	}
 }
 
 func AddMedicine(c *gin.Context) {
@@ -40,8 +55,9 @@ func AddMedicine(c *gin.Context) {
 }
 
 func DeleteMedicine(c *gin.Context) {
-	var id = c.Param("ID")
-	id_int, err := strconv.ParseInt(id, 10, 32)
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	id := c.Param("id")
+	id_int, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		fmt.Printf("cannot  convert  string to int (id) ")
 	}
@@ -53,7 +69,7 @@ func DeleteMedicine(c *gin.Context) {
 		c.IndentedJSON(400, "deleted failure")
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"message": medicine.TabletName + " Deleted Succesfully",
+			"message": medicine,
 		})
 	}
 

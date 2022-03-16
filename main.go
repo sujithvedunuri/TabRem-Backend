@@ -24,9 +24,13 @@ func main() {
 	database.Init()
 
 	p.GET("/getmedicines", controllers.GetMedicineDetails)
-	p.GET("/getmedicines:id", controllers.GetCurrentMedicineDetail)
+	p.GET("/getmedicines/:id", controllers.GetCurrentMedicineDetail)
 	p.POST("/addmedicine", controllers.AddMedicine)
 	p.POST("/getUserDetails", controllers.GetUserDetails)
+	p.POST("/deletemedicine/:id", controllers.DeleteMedicine)
+	p.POST("/api/login", controllers.LoginUser)
+	p.POST("/api/register", controllers.RegisterUser)
+
 	// r.Run(":3000")
 
 	key := securecookie.GenerateRandomKey(12) // Replace with your SESSION_SECRET or similar
