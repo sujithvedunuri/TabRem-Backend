@@ -1,33 +1,22 @@
 package controllers
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"sujith/tabRemBackend/beans"
 	"sujith/tabRemBackend/resources/database"
 	"time"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserDetails(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Fatal("error")
-	}
-	fmt.Println(string(jsonData))
-	c.IndentedJSON(200, jsonData)
-}
-
 const Secretkey = "secret"
 
 func LoginUser(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var data map[string]string
 
 	if err := c.BindJSON(&data); err != nil {
@@ -57,24 +46,15 @@ func LoginUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 	}
 
-	// cookie := http.SetCookie(c.Writer, &http.Cookie{
-	// 	Name:       "jwt",
-	// 	Value:      token,
-	// 	Path:       "",
-	// 	Domain:     "",
-	// 	Expires:    time.Now().Add(time.Hour * 24),
-	// 	RawExpires: "",
-	// 	MaxAge:     0,
-	// 	Secure:     true,
-	// 	HttpOnly:   true,
-	// 	SameSite:   0,
-	// 	Raw:        "",
-	// 	Unparsed:   []string{},
-	// })
+	cookie1 := &http.Cookie{Name: "jwt", Value: token, HttpOnly: true, Expires: time.Now().Add(time.Hour * 24)}
+	http.SetCookie(c.Writer, cookie1)
+
 	c.JSON(http.StatusOK, token)
 
 }
 func RegisterUser(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
 		c.JSON(404, "cannot send data")
@@ -84,9 +64,34 @@ func RegisterUser(c *gin.Context) {
 	user := beans.User{
 		Name:     data["name"],
 		Email:    data["email"],
-		Password: string(password),
+		Password: password,
 	}
 	database.Db.Create(&user)
 	c.JSON(http.StatusOK, user)
 
+}
+
+func GetUser(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	cookie, er := c.Cookie("jwt")
+	if er != nil {
+		c.JSON(404, "error sujith")
+	}
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(Secretkey), nil
+	})
+	if err != nil {
+		c.JSON(401, err)
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var user beans.User
+	database.Db.Where("id =?", claims.Issuer).First(&user)
+
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+func Logout(c *gin.Context) {
+	cookie1 := &http.Cookie{Name: "jwt", Value: "", HttpOnly: true, Expires: time.Now().Add(-time.Hour)}
+	http.SetCookie(c.Writer, cookie1)
+	c.JSON(200, "success")
 }

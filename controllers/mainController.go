@@ -44,6 +44,7 @@ func GetCurrentMedicineDetail(c *gin.Context) {
 }
 
 func AddMedicine(c *gin.Context) {
+	
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	var medicineData beans.Medicine
 	if err := c.ShouldBindJSON(&medicineData); err != nil {
