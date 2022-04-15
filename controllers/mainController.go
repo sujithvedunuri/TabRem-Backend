@@ -44,15 +44,22 @@ func GetCurrentMedicineDetail(c *gin.Context) {
 }
 
 func AddMedicine(c *gin.Context) {
-	
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	var medicineData beans.Medicine
-	if err := c.ShouldBindJSON(&medicineData); err != nil {
-		fmt.Print(medicineData)
-	} else {
-		fmt.Print("failed to add data to databse")
+	if err:=c.ShouldBindJSON(&medicineData); err== nil {
+		if er :=database.Db.Where("tablet_name = ?",medicineData.TabletName).Find(&medicineData); er!=nil{
+			c.JSON(400,gin.H{
+				"err":"Medicine name already exists",
+			})
+		}
+			err:=database.Db.Create(&medicineData)
+			c.JSON(200,gin.H{
+				"data":medicineData,
+				"Err":err,
+			})
+	}else{
+		c.JSON(404,gin.H{"err":"error while marshalling data"})
 	}
-	database.Db.Create(&medicineData)
 }
 
 func DeleteMedicine(c *gin.Context) {

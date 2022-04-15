@@ -2,11 +2,8 @@ package daos
 
 import (
 	"fmt"
-	"log"
 	"sujith/tabRemBackend/beans"
 	"sujith/tabRemBackend/resources/database"
-
-	"github.com/gin-gonic/gin"
 )
 
 //fetch all details from database
@@ -24,17 +21,11 @@ func FetchMedicineById(id int) ([]beans.Medicine, error) {
 }
 
 //add details to database
-func AddMedicineDetials(c *gin.Context) {
-	var medicines beans.Medicine
-	if err := c.ShouldBindJSON(&medicines); err == nil {
-		database.Db.Create(&medicines)
-	} else {
-		log.Fatal(err)
-	}
-	meds := c.Params
-	log.Fatal(meds)
-	// database.Db.Create(&medicines)
+func AddMedicineDetials(medicines beans.Medicine) (error){
+	err:=database.Db.Create(&medicines)
+return err.Error
 }
+
 
 //delete row from table
 func DeleteMedicineFromDB(id int) (beans.Medicine, error) {

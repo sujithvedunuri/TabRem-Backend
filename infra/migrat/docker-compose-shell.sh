@@ -7,7 +7,5 @@ GREEN='\033[0;32m'
 
 echo -e "${RED}stopping container"
 docker stop mysql-db
-echo -e "${LIGHTRED}removing container"
-docker rm mysql-db
 echo -e "${GREEN}restart"
 docker compose up -d
